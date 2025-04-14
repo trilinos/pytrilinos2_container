@@ -1,0 +1,45 @@
+FROM docker.io/library/ubuntu:latest
+
+RUN apt-get update \
+    && apt-get install -y \
+    gcc g++ gfortran \
+    make cmake ninja-build \
+    libssl-dev ca-certificates \
+    ccache \
+    git less \
+    libopenblas-serial-dev \
+    mpi-default-bin mpi-default-dev \
+    libhdf5-mpi-dev hdf5-tools \
+    libblosc-dev libbz2-dev libxml2-dev \
+    libnetcdf-dev \
+    libnetcdf-mpi-dev \
+    libpnetcdf-dev \
+    libnetcdf-pnetcdf-dev \
+    libsuperlu-dev \
+    libsuperlu-dist-dev \
+    libboost-dev \
+    libboost-all-dev \
+    llvm-dev clang libclang-dev libzstd-dev \
+    python3 python3-dev python-is-python3 python3-pip python3-numpy python3-scipy python3-matplotlib python3-mpi4py python3-yaml python3-h5py python3-tk \
+    python3-pybind11 \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install binder
+RUN git clone https://github.com/RosettaCommons/binder.git /binder \
+    && cd /binder && mkdir binder-build && cd binder-build \
+    && cmake -DCMAKE_CXX_COMPILER="$(which clang++)" .. \
+    && make install \
+    && cd / && rm -rf /binder
+
+# allow running MPI as root in the container
+# bind MPI ranks to hwthreads
+ENV OMPI_MCA_hwloc_base_binding_policy=hwthread \
+    MPIEXEC_FLAGS=--allow-run-as-root \
+    OMPI_ALLOW_RUN_AS_ROOT=1 \
+    OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
+    PIP_BREAK_SYSTEM_PACKAGES=1 \
+    PIP_ROOT_USER_ACTION=ignore
+
+# Install Jupyterlab
+RUN pip install notebook jupyterlab wurlitzer ipyparallel

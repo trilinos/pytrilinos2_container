@@ -1,0 +1,25 @@
+ARG base_image=ghcr.io/trilinos/pytrilino2_dependencies:latest
+
+FROM ${base_image}
+
+COPY . /scripts
+COPY ../Trilinos /workdir/trilinos/source
+COPY ../kokkos-tools /workdir/kokkos-tools/source
+
+ENV TRILINOS_DIR=/workdir/trilinos/source \
+    TRILINOS_BUILD_DIR=/workdir/trilinos/build \
+    TRILINOS_INSTALL_DIR=/workdir/trilinos/install \
+    KOKKOS_TOOLS_DIR=/workdir/kokkos-tools/source \
+    KOKKOS_TOOLS_BUILD_DIR=/workdir/kokkos-tools/build \
+    KOKKOS_TOOLS_INSTALL_DIR=/workdir/kokkos-tools/install \
+    PYTHONPATH=/workdir/trilinos/build/packages/PyTrilinos2
+
+
+SHELL ["/bin/bash", "-c"]
+
+RUN mkdir -p $TRILINOS_BUILD_DIR && \
+    mkdir -p $KOKKOS_TOOLS_BUILD_DIR
+
+RUN source /scripts/commandsDevContainer.sh && \
+    configure_trilinos && \
+    build_trilinos

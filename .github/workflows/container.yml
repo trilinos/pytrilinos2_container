@@ -1,0 +1,183 @@
+name: Container
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+    IMAGE_NAME: pytrilinos2
+    IMAGE_TAGS: latest ${{ github.sha }}
+    TEST_IMAGE_TAG: ${{ github.sha }}
+    IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
+    REGISTRY_USER: ${{ github.actor }}
+    REGISTRY_PASSWORD: ${{ github.token }}
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481 # v2.11.0
+      with:
+        egress-policy: audit
+
+    - name: Change image tags for PRs
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "IMAGE_TAGS=pr-${{ github.event.number }}" >> $GITHUB_ENV
+        echo "TEST_IMAGE_TAG=pr-${{ github.event.number }}" >> $GITHUB_ENV
+
+    - name: Delete huge unnecessary tools folder
+      run: rm -rf /opt/hostedtoolcache
+
+    - name: Check out
+      if: always()
+      uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      with:
+        fetch-depth: 0
+
+    # - name: Check out Trilinos
+    #   if: always()
+    #   uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+    #   with:
+    #     repository: trilinos/Trilinos
+    #     ref: develop
+    #     path: Trilinos
+
+    - name: Check out Trilinos
+      if: always()
+      uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      with:
+        repository: cgcgcg/Trilinos
+        ref: pytrilinos2_image
+        path: Trilinos
+
+    - name: Check out kokkos-tools
+      if: always()
+      uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      with:
+        repository: kokkos/kokkos-tools
+        ref: develop
+        path: kokkos-tools
+
+    - name: Build Image with dependencies
+      id: build_image_dependencies
+      uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
+      with:
+        image: pytrilinos2_dependencies
+        tags: ${{ env.IMAGE_TAGS }}
+        containerfiles: |
+          ./Dockerfile.dependencies
+
+    - name: Push To GHCR
+      uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
+      id: push_dependencies
+      with:
+        image: ${{ steps.build_image_dependencies.outputs.image }}
+        tags: ${{ steps.build_image_dependencies.outputs.tags }}
+        registry: ${{ env.IMAGE_REGISTRY }}
+        username: ${{ env.REGISTRY_USER }}
+        password: ${{ env.REGISTRY_PASSWORD }}
+        extra-args: |
+          --disable-content-trust
+
+    - name: Build Image with Trilinos
+      id: build_image_trilinos
+      uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
+      with:
+        image: pytrilinos2_trilinos
+        tags: ${{ env.IMAGE_TAGS }}
+        containerfiles: |
+          ./Dockerfile.trilinos
+        build-args: |
+          base_image=${{ steps.build_image_dependencies.outputs.image-with-tag }}
+
+    - name: Push To GHCR
+      uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
+      id: push_trilinos
+      with:
+        image: ${{ steps.build_image_trilinos.outputs.image }}
+        tags: ${{ steps.build_image_trilinos.outputs.tags }}
+        registry: ${{ env.IMAGE_REGISTRY }}
+        username: ${{ env.REGISTRY_USER }}
+        password: ${{ env.REGISTRY_PASSWORD }}
+        extra-args: |
+          --disable-content-trust
+
+    - name: Build Image for Binder
+      id: build_image_binder
+      uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
+      with:
+        image: pytrilinos2_binder
+        tags: ${{ env.IMAGE_TAGS }}
+        containerfiles: |
+          ./Dockerfile.binder
+        build-args: |
+          base_image=${{ steps.build_image_trilinos.outputs.image-with-tag }}
+
+    - name: Push To GHCR
+      uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
+      id: push_binder
+      with:
+        image: ${{ steps.build_image_binder.outputs.image }}
+        tags: ${{ steps.build_image_binder.outputs.tags }}
+        registry: ${{ env.IMAGE_REGISTRY }}
+        username: ${{ env.REGISTRY_USER }}
+        password: ${{ env.REGISTRY_PASSWORD }}
+        extra-args: |
+          --disable-content-trust
+
+    - name: Echo outputs
+      if: github.event_name == 'push'
+      run: |
+        echo "${{ toJSON(steps.push.outputs) }}"
+
+  # update-binder-image:
+  #   permissions:
+  #     contents: write  # for peter-evans/create-pull-request to create branch
+  #     pull-requests: write  # for peter-evans/create-pull-request to create a PR
+  #   needs: container
+  #   if: github.event_name == 'push'
+
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Harden Runner
+  #       uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481 # v2.11.0
+  #       with:
+  #         egress-policy: audit
+
+  #     - name: Checkout binder branch
+  #       uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+  #       with:
+  #         ref: binder
+
+  #     - name: Modify Dockerfile
+  #       run: |
+  #         python generateDockerfile.py ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TEST_IMAGE_TAG }}
+
+  #     - name: Create PR
+  #       uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+  #       with:
+  #         token: ${{ secrets.GITHUB_TOKEN }}
+  #         commit-message: "Update Dockerfile"
+  #         title: "Update Dockerfile"
+  #         body: |
+  #           This PR updates the Dockerfile for binder.
+  #         branch: binder-update
+  #         base: binder
+  #         delete-branch: true
