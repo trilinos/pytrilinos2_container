@@ -1,6 +1,4 @@
-ARG base_image=ghcr.io/trilinos/pytrilino2_trilinos:latest
-
-FROM ${base_image}
+FROM ghcr.io/cgcgcg/trilinos:e1a31e21d4948fa419f3132d1fa97f7310c671ff
 
 # Set up user for binder
 ARG NB_USER=jovyan
