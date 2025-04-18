@@ -19,6 +19,13 @@ while [[ $# -gt 0 ]]; do
 done
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 
+# Trilinos on host
+TRILINOS_BUILD=${TRILINOS_BUILD:=${SCRIPT_PATH}/trilinos/build}
+TRILINOS_INSTALL=${TRILINOS_INSTALL:=${SCRIPT_PATH}/trilinos/install}
+# Kokkos-Tools on host
+KOKKOS_TOOLS_BUILD=${KOKKOS_TOOLS_BUILD:=${SCRIPT_PATH}/kokkos-tools/build}
+KOKKOS_TOOLS_INSTALL=${KOKKOS_TOOLS_INSTALL:=${SCRIPT_PATH}/kokkos-tools/install}
+
 if [[ $CONFIG == "dependencies" ]] ; then
     ##################################################
     # container name
@@ -77,9 +84,6 @@ LAUNCH_COMMANDS+=("source /scripts/commandsDevContainer.sh")
 ##################################################
 # Trilinos
 
-TRILINOS_BUILD=${TRILINOS_BUILD:=${SCRIPT_PATH}/trilinos/build}
-TRILINOS_INSTALL=${TRILINOS_INSTALL:=${SCRIPT_PATH}/trilinos/install}
-
 mkdir -p ${TRILINOS_BUILD}
 mkdir -p ${TRILINOS_INSTALL}
 
@@ -95,9 +99,6 @@ LAUNCH_COMMANDS+=("cd \${TRILINOS_BUILD_DIR}")
 
 ##################################################
 # Kokkos Tools
-
-KOKKOS_TOOLS_BUILD=${KOKKOS_TOOLS_BUILD:=${SCRIPT_PATH}/kokkos-tools/build}
-KOKKOS_TOOLS_INSTALL=${KOKKOS_TOOLS_INSTALL:=${SCRIPT_PATH}/kokkos-tools/install}
 
 mkdir -p ${KOKKOS_TOOLS_BUILD}
 mkdir -p ${KOKKOS_TOOLS_INSTALL}
@@ -120,5 +121,6 @@ PODMAN_ARGS+=(
     "-v${SCRIPT_PATH}/notebooks:${WORKSPACE}/notebooks"
 )
 LAUNCH_COMMANDS+=(
-    "jupyter notebook --port=${NOTEBOOK_PORT} --no-browser --allow-root --ip=0.0.0.0 --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=${WORKSPACE}/notebooks > /dev/null 2>&1 & echo 'Jupyter Notebook server started.'"
+    "jupyter labextension disable '@jupyterlab/apputils-extension:announcements'"
+    "jupyter lab --port=${NOTEBOOK_PORT} --no-browser --allow-root --ip=0.0.0.0 --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=${WORKSPACE}/notebooks > /dev/null 2>&1 & echo 'Jupyter Notebook server started.'"
 )
