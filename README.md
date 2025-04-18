@@ -28,12 +28,12 @@ In either case, please install `podman` or `docker` first.
 
 To pull the image with PyTrilinos2 pre-installed, run
 ```
-podman pull ghcr.io/trilinos/pytrilinos2_container/trilinos:latest
+podman pull ghcr.io/trilinos/trilinos:latest
 ```
 
 To pull an image with only the dependencies for PyTrilinos2, run
 ```
-podman pull ghcr.io/trilinos/pytrilinos2_container/dependencies:latest
+podman pull ghcr.io/trilinos/dependencies:latest
 ```
 
 ### [Running locally](#local)
@@ -58,4 +58,4 @@ Once in the container Trilinos can be configured and built using
 configure_trilinos
 build_trilinos
 ```
-The configuration for the build can be found in trilinos-build.cmake
+The configuration for the build can be found in [trilinos-build.cmake](https://github.com/trilinos/pytrilinos2_container/blob/main/trilinos-build.cmake).
