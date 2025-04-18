@@ -1,4 +1,4 @@
-FROM ghcr.io/trilinos/trilinos:dfde3d91e3052b926670974958604777b7bb240b
+FROM ghcr.io/trilinos/trilinos:8767b9e3815ba609554acebf7e177b04fd79c61b
 
 # Set up user for binder
 ARG NB_USER=jovyan
