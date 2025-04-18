@@ -22,13 +22,13 @@ set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 if [[ $CONFIG == "dependencies" ]] ; then
     ##################################################
     # container name
-    CONTAINER_NAME=pytrilinos2_dependencies
+    CONTAINER_NAME=pytrilinos2-dependencies
 
     ##################################################
     # image
     CONTAINER_HOME=/root
 
-    IMAGE=ghcr.io/trilinos/pytrilinos2_container/dependencies:latest
+    IMAGE=ghcr.io/trilinos/dependencies:latest
     DOCKERFILE=${SCRIPT_PATH}/Dockerfile.dependencies
 
     TRILINOS_SRC=${TRILINOS_SRC:=${SCRIPT_PATH}/trilinos/source}
@@ -56,13 +56,13 @@ if [[ $CONFIG == "dependencies" ]] ; then
 elif [[ $CONFIG == "trilinos" ]] ; then
     ##################################################
     # container name
-    CONTAINER_NAME=pytrilinos2_trilinos
+    CONTAINER_NAME=pytrilinos2-trilinos
 
     ##################################################
     # image
     CONTAINER_HOME=/root
 
-    IMAGE=ghcr.io/trilinos/pytrilinos2_container/trilinos:latest
+    IMAGE=ghcr.io/trilinos/trilinos:latest
     DOCKERFILE=${SCRIPT_PATH}/Dockerfile.trilinos
 
 fi
