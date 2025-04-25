@@ -1,3 +1,6 @@
 FROM
 
-RUN cp -r /scripts/notebooks $HOME
+USER ubuntu
+RUN cp -r /scripts/notebooks /home/ubuntu
+WORKDIR /home/ubuntu/notebooks
+ENV SHELL /bin/bash
