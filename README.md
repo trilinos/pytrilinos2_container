@@ -6,7 +6,7 @@ This repository contains Dockerfiles for two images:
 - [`trilinos`](https://github.com/users/trilinos/packages/container/package/trilinos): an image with pre-installed Trilinos
 
 You can run the second image online on a JupyterHub server hosted at https://mybinder.org/.
-Click here to launch the server: [![Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/trilinos/pytrilinos2_container/binder)
+Click here to launch the server: [![Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/trilinos/pytrilinos2_container/binder?urlpath=lab/tree/PyTrilinos2.ipynb)
 
 Both images can also be pulled from the GitHub Container Registry or built locally.
 
