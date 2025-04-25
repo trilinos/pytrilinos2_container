@@ -36,3 +36,8 @@ configure_trilinos
 build_trilinos
 ```
 The configuration for the build can be found in [trilinos-build.cmake](https://github.com/trilinos/pytrilinos2_container/blob/main/trilinos-build.cmake).
+
+
+# License and Copyright
+
+See LICENSE and COPYRIGHT in this repository.

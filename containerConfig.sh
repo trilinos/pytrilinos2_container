@@ -121,6 +121,5 @@ PODMAN_ARGS+=(
     "-v${SCRIPT_PATH}/notebooks:${WORKSPACE}/notebooks"
 )
 LAUNCH_COMMANDS+=(
-    "jupyter labextension disable '@jupyterlab/apputils-extension:announcements'"
-    "jupyter lab --port=${NOTEBOOK_PORT} --no-browser --allow-root --ip=0.0.0.0 --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=${WORKSPACE}/notebooks > /dev/null 2>&1 & echo 'Jupyter Notebook server started.'"
+    "SHELL=bash jupyter lab --port=${NOTEBOOK_PORT} --no-browser --allow-root --ip=0.0.0.0 --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=${WORKSPACE}/notebooks > /dev/null 2>&1 & echo 'Jupyter Notebook server started.'"
 )
