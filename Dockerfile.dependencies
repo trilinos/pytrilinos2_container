@@ -42,5 +42,5 @@ ENV OMPI_MCA_hwloc_base_binding_policy=hwthread \
     PIP_ROOT_USER_ACTION=ignore
 
 # Install Jupyterlab
-RUN pip install notebook jupyterlab wurlitzer ipyparallel \
+RUN pip install notebook jupyterlab wurlitzer ipyparallel && \
     jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
