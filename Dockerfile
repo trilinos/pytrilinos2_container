@@ -1,6 +1,6 @@
-FROM ghcr.io/trilinos/trilinos:56886e6ffb7480e70676678c6a7de48937f78401
+FROM ghcr.io/trilinos/trilinos:b4ab3eea3af19954bd7931978bf82e1d4bd51a98
 
 USER ubuntu
 RUN cp -r /scripts/notebooks /home/ubuntu
 WORKDIR /home/ubuntu/notebooks
-ENV SHELL=/bin/bash
+ENV SHELL /bin/bash
